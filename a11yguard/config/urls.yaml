@@ -1,0 +1,121 @@
+# Test URLs configuration for a11yguard
+# This file contains URLs to test for accessibility compliance
+
+# Production URLs
+production:
+  - name: "Homepage"
+    url: "https://example.com"
+    description: "Main homepage"
+    priority: "critical"
+    
+  - name: "About Page"
+    url: "https://example.com/about"
+    description: "About us page"
+    priority: "high"
+    
+  - name: "Contact Page"
+    url: "https://example.com/contact"
+    description: "Contact form page"
+    priority: "high"
+    
+  - name: "Services Page"
+    url: "https://example.com/services"
+    description: "Services overview"
+    priority: "medium"
+    
+  - name: "Blog Page"
+    url: "https://example.com/blog"
+    description: "Blog listing page"
+    priority: "medium"
+
+# Staging URLs
+staging:
+  - name: "Staging Homepage"
+    url: "https://staging.example.com"
+    description: "Staging environment homepage"
+    priority: "critical"
+    
+  - name: "Staging About"
+    url: "https://staging.example.com/about"
+    description: "Staging about page"
+    priority: "high"
+
+# Development URLs
+development:
+  - name: "Local Development"
+    url: "http://localhost:3000"
+    description: "Local development server"
+    priority: "medium"
+    
+  - name: "Local About"
+    url: "http://localhost:3000/about"
+    description: "Local about page"
+    priority: "medium"
+
+# Test URLs for validation
+test:
+  - name: "WCAG Test Page"
+    url: "https://www.w3.org/WAI/WCAG21/quickref/"
+    description: "WCAG quick reference for testing"
+    priority: "low"
+    
+  - name: "Accessibility Test Page"
+    url: "https://www.w3.org/WAI/demos/bad/"
+    description: "Example of accessibility issues"
+    priority: "low"
+
+# Custom test scenarios
+scenarios:
+  login_flow:
+    - name: "Login Page"
+      url: "https://example.com/login"
+      description: "User login page"
+      priority: "critical"
+      
+    - name: "Dashboard"
+      url: "https://example.com/dashboard"
+      description: "User dashboard (requires login)"
+      priority: "critical"
+      
+  checkout_flow:
+    - name: "Product Page"
+      url: "https://example.com/products/123"
+      description: "Product detail page"
+      priority: "high"
+      
+    - name: "Cart Page"
+      url: "https://example.com/cart"
+      description: "Shopping cart page"
+      priority: "high"
+      
+    - name: "Checkout Page"
+      url: "https://example.com/checkout"
+      description: "Checkout process page"
+      priority: "critical"
+
+# Configuration options
+config:
+  # Default timeout for page loads (seconds)
+  timeout: 30
+  
+  # Whether to follow redirects
+  follow_redirects: true
+  
+  # Maximum number of concurrent tests
+  max_concurrent: 5
+  
+  # User agent string
+  user_agent: "a11yguard/1.0.0"
+  
+  # Authentication settings (if needed)
+  auth:
+    enabled: false
+    username: ""
+    password: ""
+    
+  # Custom headers
+  headers:
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+    Accept-Language: "en-US,en;q=0.5"
+    Accept-Encoding: "gzip, deflate"
+    Connection: "keep-alive" 

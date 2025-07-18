@@ -1,0 +1,260 @@
+# Custom accessibility rulesets for a11yguard
+# This file defines custom rules and rule combinations for different testing scenarios
+
+# WCAG 2.2 Level A ruleset
+wcag_2_2_level_a:
+  name: "WCAG 2.2 Level A"
+  description: "Web Content Accessibility Guidelines 2.2 Level A compliance"
+  rules:
+    - "color-contrast"
+    - "document-title"
+    - "html-has-lang"
+    - "html-lang-valid"
+    - "image-alt"
+    - "label"
+    - "landmark-one-main"
+    - "link-name"
+    - "list"
+    - "listitem"
+    - "page-has-heading-one"
+    - "region"
+    - "skip-link"
+    - "tabindex"
+    - "valid-lang"
+  priority: "critical"
+
+# WCAG 2.2 Level AA ruleset
+wcag_2_2_level_aa:
+  name: "WCAG 2.2 Level AA"
+  description: "Web Content Accessibility Guidelines 2.2 Level AA compliance"
+  extends: "wcag_2_2_level_a"
+  additional_rules:
+    - "color-contrast-enhanced"
+    - "focus-order-semantics"
+    - "heading-order"
+    - "landmark-unique"
+    - "link-in-text-block"
+    - "meta-refresh"
+    - "page-has-main"
+    - "region-labelledby"
+    - "target-size"
+  priority: "high"
+
+# Section 508 ruleset
+section_508:
+  name: "Section 508"
+  description: "Section 508 of the Rehabilitation Act compliance"
+  rules:
+    - "color-contrast"
+    - "document-title"
+    - "html-has-lang"
+    - "image-alt"
+    - "label"
+    - "landmark-one-main"
+    - "link-name"
+    - "list"
+    - "listitem"
+    - "page-has-heading-one"
+    - "region"
+    - "skip-link"
+    - "tabindex"
+    - "valid-lang"
+    - "frame-title"
+    - "table-fake-caption"
+    - "td-has-header"
+    - "th-has-data-cells"
+  priority: "critical"
+
+# E-commerce specific ruleset
+ecommerce:
+  name: "E-commerce Accessibility"
+  description: "Accessibility rules specific to e-commerce websites"
+  extends: "wcag_2_2_level_aa"
+  additional_rules:
+    - "button-name"
+    - "form-field-multiple-labels"
+    - "form-fieldset"
+    - "input-button-name"
+    - "select-name"
+    - "textarea-name"
+    - "checkboxgroup"
+    - "radiogroup"
+    - "combobox"
+    - "dialog-name"
+    - "menubar"
+    - "menuitem"
+    - "menuitemcheckbox"
+    - "menuitemradio"
+    - "option"
+    - "progressbar-name"
+    - "slider"
+    - "spinbutton"
+    - "tab"
+    - "tablist"
+    - "tabpanel"
+    - "toolbar"
+    - "tooltip"
+  priority: "high"
+
+# Government website ruleset
+government:
+  name: "Government Website Accessibility"
+  description: "Accessibility rules for government websites (Section 508 + additional requirements)"
+  extends: "section_508"
+  additional_rules:
+    - "color-contrast-enhanced"
+    - "focus-order-semantics"
+    - "heading-order"
+    - "landmark-unique"
+    - "link-in-text-block"
+    - "meta-refresh"
+    - "page-has-main"
+    - "region-labelledby"
+    - "target-size"
+    - "autocomplete-valid"
+    - "error-message"
+    - "fieldset"
+    - "form-field-multiple-labels"
+    - "input-button-name"
+    - "select-name"
+    - "textarea-name"
+  priority: "critical"
+
+# Educational website ruleset
+educational:
+  name: "Educational Website Accessibility"
+  description: "Accessibility rules for educational websites"
+  extends: "wcag_2_2_level_aa"
+  additional_rules:
+    - "audio-caption"
+    - "video-caption"
+    - "video-description"
+    - "video-name"
+    - "object-alt"
+    - "embed-alt"
+    - "applet-alt"
+    - "iframe-title"
+    - "frame-title"
+    - "table-fake-caption"
+    - "td-has-header"
+    - "th-has-data-cells"
+    - "table-duplicate-name"
+    - "table-fake-caption"
+    - "table-identical-headers"
+    - "table-identical-rows"
+    - "table-identical-rows-accessible-name"
+  priority: "high"
+
+# Mobile accessibility ruleset
+mobile:
+  name: "Mobile Accessibility"
+  description: "Accessibility rules optimized for mobile devices"
+  extends: "wcag_2_2_level_aa"
+  additional_rules:
+    - "target-size"
+    - "touch-target"
+    - "viewport"
+    - "meta-viewport"
+    - "meta-viewport-large"
+    - "meta-viewport-scale"
+    - "meta-viewport-user-scalable"
+    - "meta-viewport-width"
+    - "meta-viewport-height"
+    - "meta-viewport-initial-scale"
+    - "meta-viewport-minimum-scale"
+    - "meta-viewport-maximum-scale"
+  priority: "high"
+
+# Custom organization rules
+organization_custom:
+  name: "Organization Custom Rules"
+  description: "Custom accessibility rules specific to our organization"
+  extends: "wcag_2_2_level_aa"
+  custom_rules:
+    - name: "brand-color-contrast"
+      description: "Ensure brand colors meet contrast requirements"
+      severity: "error"
+      selector: "[class*='brand'], [class*='primary']"
+      
+    - name: "logo-alt-text"
+      description: "All logos must have descriptive alt text"
+      severity: "error"
+      selector: "img[src*='logo']"
+      
+    - name: "form-validation"
+      description: "Form validation messages must be accessible"
+      severity: "warning"
+      selector: ".error, .validation-message"
+      
+    - name: "navigation-consistency"
+      description: "Navigation must be consistent across pages"
+      severity: "info"
+      selector: "nav, [role='navigation']"
+
+# Testing environments
+environments:
+  development:
+    ruleset: "wcag_2_2_level_a"
+    max_violations: 10
+    fail_on_critical: true
+    
+  staging:
+    ruleset: "wcag_2_2_level_aa"
+    max_violations: 5
+    fail_on_critical: true
+    
+  production:
+    ruleset: "wcag_2_2_level_aa"
+    max_violations: 0
+    fail_on_critical: true
+    fail_on_high: true
+
+# Rule severity levels
+severity_levels:
+  critical:
+    description: "Critical accessibility issues that must be fixed"
+    color: "#d32f2f"
+    fail_build: true
+    
+  high:
+    description: "High priority accessibility issues"
+    color: "#f57c00"
+    fail_build: false
+    
+  medium:
+    description: "Medium priority accessibility issues"
+    color: "#fbc02d"
+    fail_build: false
+    
+  low:
+    description: "Low priority accessibility issues"
+    color: "#388e3c"
+    fail_build: false
+    
+  info:
+    description: "Informational accessibility notes"
+    color: "#1976d2"
+    fail_build: false
+
+# Custom rule definitions
+custom_rules:
+  brand_compliance:
+    name: "Brand Compliance"
+    description: "Ensure brand elements meet accessibility standards"
+    category: "branding"
+    impact: "moderate"
+    tags: ["brand", "design", "contrast"]
+    
+  form_accessibility:
+    name: "Form Accessibility"
+    description: "Ensure all forms are fully accessible"
+    category: "forms"
+    impact: "serious"
+    tags: ["forms", "input", "labels"]
+    
+  navigation_accessibility:
+    name: "Navigation Accessibility"
+    description: "Ensure navigation is accessible to all users"
+    category: "navigation"
+    impact: "serious"
+    tags: ["navigation", "menu", "links"] 

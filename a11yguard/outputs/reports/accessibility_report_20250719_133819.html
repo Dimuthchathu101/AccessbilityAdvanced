@@ -1,0 +1,2495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessibility Test Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .summary {
+            background: #f8f9fa;
+            padding: 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .summary h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .metric-card.violations {
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .metric-card.passes {
+            border-left: 4px solid #27ae60;
+        }
+        
+        .metric-card.errors {
+            border-left: 4px solid #f39c12;
+        }
+        
+        .metric-card.urls {
+            border-left: 4px solid #3498db;
+        }
+        
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .violations .metric-value {
+            color: #e74c3c;
+        }
+        
+        .passes .metric-value {
+            color: #27ae60;
+        }
+        
+        .errors .metric-value {
+            color: #f39c12;
+        }
+        
+        .urls .metric-value {
+            color: #3498db;
+        }
+        
+        .compliance-rate {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .compliance-rate h3 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .compliance-percentage {
+            font-size: 3em;
+            font-weight: bold;
+        }
+        
+        .results-section {
+            padding: 30px;
+        }
+        
+        .url-header {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+        
+        .url-summary {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .url-summary .url-info {
+            flex: 1;
+        }
+        
+        .url-summary .url-stats {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .url-stat {
+            text-align: center;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .url-stat.violations {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .url-stat.passes {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .violation {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .violation h3 {
+            color: #c53030;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .violation-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .detail-item {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #e74c3c;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #2d3748;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .detail-value {
+            color: #4a5568;
+            margin-top: 5px;
+        }
+        
+        .pass {
+            background: #f0fff4;
+            border: 1px solid #c6f6d5;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .pass h3 {
+            color: #22543d;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        
+        .pass-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .pass .detail-item {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #27ae60;
+        }
+        
+        .error {
+            background: #fffaf0;
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .error strong {
+            color: #c05621;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .violations-details {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .violations-details h3 {
+            color: #c53030;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            position: sticky;
+            top: 0;
+            background: #fff5f5;
+            padding: 10px 0;
+            z-index: 10;
+        }
+        
+        .passes-details {
+            background: #f0fff4;
+            border: 1px solid #c6f6d5;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .passes-details h3 {
+            color: #22543d;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            position: sticky;
+            top: 0;
+            background: #f0fff4;
+            padding: 10px 0;
+            z-index: 10;
+        }
+        
+        .back-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 1em;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+        
+        .back-button:hover {
+            background: #2980b9;
+        }
+        
+        .url-section {
+            margin: 20px 0;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .url-section-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .url-section-content {
+            padding: 20px;
+        }
+        
+        /* Custom scrollbar styling */
+        .violations-details::-webkit-scrollbar,
+        .passes-details::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .violations-details::-webkit-scrollbar-track,
+        .passes-details::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .violations-details::-webkit-scrollbar-thumb,
+        .passes-details::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .violations-details::-webkit-scrollbar-thumb:hover,
+        .passes-details::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* Firefox scrollbar styling */
+        .violations-details,
+        .passes-details {
+            scrollbar-width: thin;
+            scrollbar-color: #c1c1c1 #f1f1f1;
+        }
+        
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .violation-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .url-summary .url-stats {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Accessibility Test Report</h1>
+            <p>Comprehensive accessibility analysis results</p>
+        </div>
+        
+        <div class="summary">
+            <h2>📊 Test Summary</h2>
+            <div class="metrics-grid">
+                <div class="metric-card urls">
+                    <div class="metric-value">3</div>
+                    <div class="metric-label">URLs Tested</div>
+                </div>
+                <div class="metric-card violations" onclick="showViolations()">
+                    <div class="metric-value">10</div>
+                    <div class="metric-label">Total Violations</div>
+                </div>
+                <div class="metric-card passes" onclick="showPasses()">
+                    <div class="metric-value">42</div>
+                    <div class="metric-label">Total Passes</div>
+                </div>
+                <div class="metric-card errors">
+                    <div class="metric-value">0</div>
+                    <div class="metric-label">Test Errors</div>
+                </div>
+            </div>
+            
+            <div class="compliance-rate">
+                <h3>🎯 Compliance Rate</h3>
+                <div class="compliance-percentage">80.77%</div>
+            </div>
+            
+            <p style="margin-top: 20px; color: #7f8c8d; font-size: 0.9em;">
+                <strong>Generated:</strong> 2025-07-19 13:38:19
+            </p>
+        </div>
+        
+        <div id="violations-details" class="violations-details hidden">
+            <button class="back-button" onclick="hideViolations()">← Back to Summary</button>
+            <h3>🚨 All Violations Found</h3>
+            <div id="violations-list"></div>
+        </div>
+        
+        <div id="passes-details" class="passes-details hidden">
+            <button class="back-button" onclick="hidePasses()">← Back to Summary</button>
+            <h3>✅ All Passed Checks</h3>
+            <div id="passes-list"></div>
+        </div>
+        
+        <div id="results-section" class="results-section">
+            <h2 style="color: #2c3e50; margin-bottom: 20px;">🌐 URLs Tested</h2>
+
+            <div class="url-section">
+                <div class="url-section-header">🌐 https://example.com</div>
+                <div class="url-section-content">
+                    <div class="url-summary">
+                        <div class="url-info">
+                            <strong>URL:</strong> https://example.com
+                        </div>
+                        <div class="url-stats">
+                            <div class="url-stat violations">3 Violations</div>
+                            <div class="url-stat passes">11 Passes</div>
+                        </div>
+                    </div>
+            <h3 style="color: #c53030; margin: 20px 0 10px 0;">❌ Violations</h3>
+                    <div class="violation">
+                        <h3>❌ <html> element must have a lang attribute</h3>
+                        <div class="violation-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Impact</div>
+                                <div class="detail-value">serious</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures every HTML document has a lang attribute</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/html-has-lang?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="violation">
+                        <h3>❌ Document should have one main landmark</h3>
+                        <div class="violation-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Impact</div>
+                                <div class="detail-value">moderate</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures the document has a main landmark</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/landmark-one-main?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="violation">
+                        <h3>❌ All page content should be contained by landmarks</h3>
+                        <div class="violation-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Impact</div>
+                                <div class="detail-value">moderate</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures all page content is contained by landmarks</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/region?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 style="color: #22543d; margin: 20px 0 10px 0;">✅ Passes</h3>
+                    <div class="pass">
+                        <h3>✅ aria-hidden="true" must not be present on the document body</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures aria-hidden="true" is not present on the document body.</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/aria-hidden-body?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Page must have means to bypass repeated blocks</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures each page has at least one mechanism for a user to bypass navigation and jump straight to the content</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/bypass?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Elements must meet minimum color contrast ratio thresholds</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/color-contrast?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Documents must have <title> element to aid in navigation</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures each HTML document contains a non-empty <title> element</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/document-title?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Headings should not be empty</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures headings have discernible text</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/empty-heading?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Heading levels should only increase by one</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures the order of headings is semantically correct</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/heading-order?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Links must have discernible text</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures links have discernible text</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/link-name?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Users should be able to zoom and scale the text up to 500%</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures <meta name="viewport"> can scale a significant amount</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/meta-viewport-large?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Zooming and scaling must not be disabled</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures <meta name="viewport"> does not disable text scaling and zooming</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/meta-viewport?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Page should contain a level-one heading</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensure that the page, or at least one of its frames contains a level-one heading</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/page-has-heading-one?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ All page content should be contained by landmarks</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures all page content is contained by landmarks</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/region?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="url-section">
+                <div class="url-section-header">🌐 https://example.org</div>
+                <div class="url-section-content">
+                    <div class="url-summary">
+                        <div class="url-info">
+                            <strong>URL:</strong> https://example.org
+                        </div>
+                        <div class="url-stats">
+                            <div class="url-stat violations">3 Violations</div>
+                            <div class="url-stat passes">11 Passes</div>
+                        </div>
+                    </div>
+            <h3 style="color: #c53030; margin: 20px 0 10px 0;">❌ Violations</h3>
+                    <div class="violation">
+                        <h3>❌ <html> element must have a lang attribute</h3>
+                        <div class="violation-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Impact</div>
+                                <div class="detail-value">serious</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures every HTML document has a lang attribute</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/html-has-lang?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="violation">
+                        <h3>❌ Document should have one main landmark</h3>
+                        <div class="violation-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Impact</div>
+                                <div class="detail-value">moderate</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures the document has a main landmark</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/landmark-one-main?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="violation">
+                        <h3>❌ All page content should be contained by landmarks</h3>
+                        <div class="violation-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Impact</div>
+                                <div class="detail-value">moderate</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures all page content is contained by landmarks</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/region?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 style="color: #22543d; margin: 20px 0 10px 0;">✅ Passes</h3>
+                    <div class="pass">
+                        <h3>✅ aria-hidden="true" must not be present on the document body</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures aria-hidden="true" is not present on the document body.</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/aria-hidden-body?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Page must have means to bypass repeated blocks</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures each page has at least one mechanism for a user to bypass navigation and jump straight to the content</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/bypass?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Elements must meet minimum color contrast ratio thresholds</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/color-contrast?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Documents must have <title> element to aid in navigation</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures each HTML document contains a non-empty <title> element</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/document-title?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Headings should not be empty</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures headings have discernible text</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/empty-heading?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Heading levels should only increase by one</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures the order of headings is semantically correct</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/heading-order?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Links must have discernible text</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures links have discernible text</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/link-name?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Users should be able to zoom and scale the text up to 500%</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures <meta name="viewport"> can scale a significant amount</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/meta-viewport-large?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Zooming and scaling must not be disabled</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures <meta name="viewport"> does not disable text scaling and zooming</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/meta-viewport?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Page should contain a level-one heading</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensure that the page, or at least one of its frames contains a level-one heading</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/page-has-heading-one?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ All page content should be contained by landmarks</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures all page content is contained by landmarks</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/region?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="url-section">
+                <div class="url-section-header">🌐 https://httpbin.org</div>
+                <div class="url-section-content">
+                    <div class="url-summary">
+                        <div class="url-info">
+                            <strong>URL:</strong> https://httpbin.org
+                        </div>
+                        <div class="url-stats">
+                            <div class="url-stat violations">4 Violations</div>
+                            <div class="url-stat passes">20 Passes</div>
+                        </div>
+                    </div>
+            <h3 style="color: #c53030; margin: 20px 0 10px 0;">❌ Violations</h3>
+                    <div class="violation">
+                        <h3>❌ Elements must meet minimum color contrast ratio thresholds</h3>
+                        <div class="violation-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Impact</div>
+                                <div class="detail-value">serious</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/color-contrast?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="violation">
+                        <h3>❌ Document should have one main landmark</h3>
+                        <div class="violation-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Impact</div>
+                                <div class="detail-value">moderate</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures the document has a main landmark</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/landmark-one-main?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="violation">
+                        <h3>❌ Page should contain a level-one heading</h3>
+                        <div class="violation-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Impact</div>
+                                <div class="detail-value">moderate</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensure that the page, or at least one of its frames contains a level-one heading</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/page-has-heading-one?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="violation">
+                        <h3>❌ All page content should be contained by landmarks</h3>
+                        <div class="violation-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Impact</div>
+                                <div class="detail-value">moderate</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures all page content is contained by landmarks</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/region?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 style="color: #22543d; margin: 20px 0 10px 0;">✅ Passes</h3>
+                    <div class="pass">
+                        <h3>✅ Elements must only use supported ARIA attributes</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures an element's role supports its ARIA attributes</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/aria-allowed-attr?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ ARIA attributes must be used as specified for the element's role</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures ARIA attributes are used as described in the specification of the element's role</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/aria-conditional-attr?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ aria-hidden="true" must not be present on the document body</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures aria-hidden="true" is not present on the document body.</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/aria-hidden-body?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ ARIA hidden element must not be focusable or contain focusable elements</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures aria-hidden elements are not focusable nor contain focusable elements</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/aria-hidden-focus?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Elements must only use permitted ARIA attributes</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures ARIA attributes are not prohibited for an element's role</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/aria-prohibited-attr?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ ARIA attributes must conform to valid values</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures all ARIA attributes have valid values</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/aria-valid-attr-value?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ ARIA attributes must conform to valid names</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures attributes that begin with aria- are valid ARIA attributes</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/aria-valid-attr?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Inline text spacing must be adjustable with custom stylesheets</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensure that text spacing set through style attributes can be adjusted with custom stylesheets</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/avoid-inline-spacing?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Page must have means to bypass repeated blocks</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures each page has at least one mechanism for a user to bypass navigation and jump straight to the content</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/bypass?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Elements must meet minimum color contrast ratio thresholds</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/color-contrast?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Documents must have <title> element to aid in navigation</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures each HTML document contains a non-empty <title> element</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/document-title?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Headings should not be empty</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures headings have discernible text</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/empty-heading?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Heading levels should only increase by one</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures the order of headings is semantically correct</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/heading-order?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ <html> element must have a lang attribute</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures every HTML document has a lang attribute</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/html-has-lang?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ <html> element must have a valid value for the lang attribute</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures the lang attribute of the <html> element has a valid value</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/html-lang-valid?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Links must be distinguishable without relying on color</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensure links are distinguished from surrounding text in a way that does not rely on color</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/link-in-text-block?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ Links must have discernible text</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures links have discernible text</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/link-name?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ <ul> and <ol> must only directly contain <li>, <script> or <template> elements</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures that lists are structured correctly</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/list?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ <li> elements must be contained in a <ul> or <ol></h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures <li> elements are used semantically</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/listitem?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pass">
+                        <h3>✅ All page content should be contained by landmarks</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">Ensures all page content is contained by landmarks</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="https://dequeuniversity.com/rules/axe/4.8/region?application=axeAPI" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <script>
+        function showViolations() {
+            document.getElementById('violations-details').classList.remove('hidden');
+            document.getElementById('passes-details').classList.add('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('violations-list').innerHTML = `<h4 style="color: #c53030; margin: 20px 0 10px 0; padding: 10px; background: #fed7d7; border-radius: 5px;">🌐 https://example.com</h4><div style="margin-left: 20px;">
+            <div class="violation">
+                <h3>❌ <html> element must have a lang attribute</h3>
+                <div class="violation-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Impact</div>
+                        <div class="detail-value">serious</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures every HTML document has a lang attribute</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/html-has-lang?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="violation">
+                <h3>❌ Document should have one main landmark</h3>
+                <div class="violation-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Impact</div>
+                        <div class="detail-value">moderate</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures the document has a main landmark</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/landmark-one-main?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="violation">
+                <h3>❌ All page content should be contained by landmarks</h3>
+                <div class="violation-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Impact</div>
+                        <div class="detail-value">moderate</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures all page content is contained by landmarks</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/region?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div><h4 style="color: #c53030; margin: 20px 0 10px 0; padding: 10px; background: #fed7d7; border-radius: 5px;">🌐 https://example.org</h4><div style="margin-left: 20px;">
+            <div class="violation">
+                <h3>❌ <html> element must have a lang attribute</h3>
+                <div class="violation-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Impact</div>
+                        <div class="detail-value">serious</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures every HTML document has a lang attribute</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/html-has-lang?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="violation">
+                <h3>❌ Document should have one main landmark</h3>
+                <div class="violation-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Impact</div>
+                        <div class="detail-value">moderate</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures the document has a main landmark</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/landmark-one-main?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="violation">
+                <h3>❌ All page content should be contained by landmarks</h3>
+                <div class="violation-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Impact</div>
+                        <div class="detail-value">moderate</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures all page content is contained by landmarks</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/region?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div><h4 style="color: #c53030; margin: 20px 0 10px 0; padding: 10px; background: #fed7d7; border-radius: 5px;">🌐 https://httpbin.org</h4><div style="margin-left: 20px;">
+            <div class="violation">
+                <h3>❌ Elements must meet minimum color contrast ratio thresholds</h3>
+                <div class="violation-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Impact</div>
+                        <div class="detail-value">serious</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/color-contrast?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="violation">
+                <h3>❌ Document should have one main landmark</h3>
+                <div class="violation-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Impact</div>
+                        <div class="detail-value">moderate</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures the document has a main landmark</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/landmark-one-main?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="violation">
+                <h3>❌ Page should contain a level-one heading</h3>
+                <div class="violation-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Impact</div>
+                        <div class="detail-value">moderate</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensure that the page, or at least one of its frames contains a level-one heading</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/page-has-heading-one?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="violation">
+                <h3>❌ All page content should be contained by landmarks</h3>
+                <div class="violation-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Impact</div>
+                        <div class="detail-value">moderate</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures all page content is contained by landmarks</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/region?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>`;
+        }
+        
+        function showPasses() {
+            document.getElementById('passes-details').classList.remove('hidden');
+            document.getElementById('violations-details').classList.add('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('passes-list').innerHTML = `<h4 style="color: #22543d; margin: 20px 0 10px 0; padding: 10px; background: #c6f6d5; border-radius: 5px;">🌐 https://example.com</h4><div style="margin-left: 20px;">
+            <div class="pass">
+                <h3>✅ aria-hidden="true" must not be present on the document body</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures aria-hidden="true" is not present on the document body.</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/aria-hidden-body?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Page must have means to bypass repeated blocks</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures each page has at least one mechanism for a user to bypass navigation and jump straight to the content</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/bypass?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Elements must meet minimum color contrast ratio thresholds</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/color-contrast?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Documents must have <title> element to aid in navigation</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures each HTML document contains a non-empty <title> element</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/document-title?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Headings should not be empty</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures headings have discernible text</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/empty-heading?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Heading levels should only increase by one</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures the order of headings is semantically correct</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/heading-order?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Links must have discernible text</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures links have discernible text</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/link-name?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Users should be able to zoom and scale the text up to 500%</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures <meta name="viewport"> can scale a significant amount</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/meta-viewport-large?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Zooming and scaling must not be disabled</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures <meta name="viewport"> does not disable text scaling and zooming</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/meta-viewport?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Page should contain a level-one heading</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensure that the page, or at least one of its frames contains a level-one heading</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/page-has-heading-one?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ All page content should be contained by landmarks</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures all page content is contained by landmarks</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/region?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div><h4 style="color: #22543d; margin: 20px 0 10px 0; padding: 10px; background: #c6f6d5; border-radius: 5px;">🌐 https://example.org</h4><div style="margin-left: 20px;">
+            <div class="pass">
+                <h3>✅ aria-hidden="true" must not be present on the document body</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures aria-hidden="true" is not present on the document body.</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/aria-hidden-body?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Page must have means to bypass repeated blocks</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures each page has at least one mechanism for a user to bypass navigation and jump straight to the content</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/bypass?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Elements must meet minimum color contrast ratio thresholds</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/color-contrast?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Documents must have <title> element to aid in navigation</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures each HTML document contains a non-empty <title> element</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/document-title?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Headings should not be empty</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures headings have discernible text</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/empty-heading?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Heading levels should only increase by one</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures the order of headings is semantically correct</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/heading-order?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Links must have discernible text</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures links have discernible text</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/link-name?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Users should be able to zoom and scale the text up to 500%</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures <meta name="viewport"> can scale a significant amount</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/meta-viewport-large?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Zooming and scaling must not be disabled</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures <meta name="viewport"> does not disable text scaling and zooming</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/meta-viewport?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Page should contain a level-one heading</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensure that the page, or at least one of its frames contains a level-one heading</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/page-has-heading-one?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ All page content should be contained by landmarks</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures all page content is contained by landmarks</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/region?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div><h4 style="color: #22543d; margin: 20px 0 10px 0; padding: 10px; background: #c6f6d5; border-radius: 5px;">🌐 https://httpbin.org</h4><div style="margin-left: 20px;">
+            <div class="pass">
+                <h3>✅ Elements must only use supported ARIA attributes</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures an element's role supports its ARIA attributes</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/aria-allowed-attr?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ ARIA attributes must be used as specified for the element's role</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures ARIA attributes are used as described in the specification of the element's role</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/aria-conditional-attr?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ aria-hidden="true" must not be present on the document body</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures aria-hidden="true" is not present on the document body.</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/aria-hidden-body?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ ARIA hidden element must not be focusable or contain focusable elements</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures aria-hidden elements are not focusable nor contain focusable elements</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/aria-hidden-focus?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Elements must only use permitted ARIA attributes</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures ARIA attributes are not prohibited for an element's role</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/aria-prohibited-attr?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ ARIA attributes must conform to valid values</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures all ARIA attributes have valid values</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/aria-valid-attr-value?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ ARIA attributes must conform to valid names</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures attributes that begin with aria- are valid ARIA attributes</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/aria-valid-attr?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Inline text spacing must be adjustable with custom stylesheets</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensure that text spacing set through style attributes can be adjusted with custom stylesheets</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/avoid-inline-spacing?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Page must have means to bypass repeated blocks</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures each page has at least one mechanism for a user to bypass navigation and jump straight to the content</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/bypass?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Elements must meet minimum color contrast ratio thresholds</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/color-contrast?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Documents must have <title> element to aid in navigation</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures each HTML document contains a non-empty <title> element</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/document-title?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Headings should not be empty</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures headings have discernible text</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/empty-heading?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Heading levels should only increase by one</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures the order of headings is semantically correct</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/heading-order?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ <html> element must have a lang attribute</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures every HTML document has a lang attribute</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/html-has-lang?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ <html> element must have a valid value for the lang attribute</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures the lang attribute of the <html> element has a valid value</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/html-lang-valid?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Links must be distinguishable without relying on color</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensure links are distinguished from surrounding text in a way that does not rely on color</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/link-in-text-block?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ Links must have discernible text</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures links have discernible text</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/link-name?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ <ul> and <ol> must only directly contain <li>, <script> or <template> elements</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures that lists are structured correctly</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/list?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ <li> elements must be contained in a <ul> or <ol></h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures <li> elements are used semantically</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/listitem?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pass">
+                <h3>✅ All page content should be contained by landmarks</h3>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">Ensures all page content is contained by landmarks</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="https://dequeuniversity.com/rules/axe/4.8/region?application=axeAPI" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>`;
+        }
+        
+        function hideViolations() {
+            document.getElementById('violations-details').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+        }
+        
+        function hidePasses() {
+            document.getElementById('passes-details').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

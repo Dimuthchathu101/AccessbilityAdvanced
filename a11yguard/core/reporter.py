@@ -365,6 +365,44 @@ class ReportGenerator:
             font-weight: 500;
         }}
         
+        .url-summary {{
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }}
+        
+        .url-summary .url-info {{
+            flex: 1;
+        }}
+        
+        .url-summary .url-stats {{
+            display: flex;
+            gap: 15px;
+        }}
+        
+        .url-stat {{
+            text-align: center;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }}
+        
+        .url-stat.violations {{
+            background: #fed7d7;
+            color: #c53030;
+        }}
+        
+        .url-stat.passes {{
+            background: #c6f6d5;
+            color: #22543d;
+        }}
+        
         .violation {{
             background: #fff5f5;
             border: 1px solid #fed7d7;
@@ -514,6 +552,25 @@ class ReportGenerator:
             background: #2980b9;
         }}
         
+        .url-section {{
+            margin: 20px 0;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }}
+        
+        .url-section-header {{
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: bold;
+            color: #2c3e50;
+        }}
+        
+        .url-section-content {{
+            padding: 20px;
+        }}
+        
         /* Custom scrollbar styling */
         .violations-details::-webkit-scrollbar,
         .passes-details::-webkit-scrollbar {{
@@ -551,6 +608,11 @@ class ReportGenerator:
             
             .violation-details {{
                 grid-template-columns: 1fr;
+            }}
+            
+            .url-summary .url-stats {{
+                flex-direction: column;
+                gap: 5px;
             }}
         }}
     </style>
@@ -606,6 +668,7 @@ class ReportGenerator:
         </div>
         
         <div id="results-section" class="results-section">
+            <h2 style="color: #2c3e50; margin-bottom: 20px;">🌐 URLs Tested</h2>
 """
         
         # Collect all violations and passes for the details sections
@@ -614,10 +677,19 @@ class ReportGenerator:
         
         for result in results:
             url = result.get('url', 'Unknown URL')
-            html += f'<div class="url-header">🌐 {url}</div>'
+            violations = []
+            passes = []
             
             if 'error' in result and result['error']:
-                html += f'<div class="error"><strong>Error:</strong> {result["error"]}</div>'
+                # Handle error case
+                html += f"""
+                <div class="url-section">
+                    <div class="url-section-header">🌐 {url}</div>
+                    <div class="url-section-content">
+                        <div class="error"><strong>Error:</strong> {result["error"]}</div>
+                    </div>
+                </div>
+                """
                 continue
             
             if 'results' in result and result['results']:
@@ -633,7 +705,26 @@ class ReportGenerator:
                 for pass_result in passes:
                     pass_result['url'] = url
                     all_passes.append(pass_result)
-                
+            
+            # Create URL section with summary
+            html += f"""
+            <div class="url-section">
+                <div class="url-section-header">🌐 {url}</div>
+                <div class="url-section-content">
+                    <div class="url-summary">
+                        <div class="url-info">
+                            <strong>URL:</strong> {url}
+                        </div>
+                        <div class="url-stats">
+                            <div class="url-stat violations">{len(violations)} Violations</div>
+                            <div class="url-stat passes">{len(passes)} Passes</div>
+                        </div>
+                    </div>
+            """
+            
+            # Add violations for this URL
+            if violations:
+                html += '<h3 style="color: #c53030; margin: 20px 0 10px 0;">❌ Violations</h3>'
                 for violation in violations:
                     html += f"""
                     <div class="violation">
@@ -658,7 +749,10 @@ class ReportGenerator:
                         </div>
                     </div>
                     """
-                
+            
+            # Add passes for this URL
+            if passes:
+                html += '<h3 style="color: #22543d; margin: 20px 0 10px 0;">✅ Passes</h3>'
                 for pass_result in passes:
                     html += f"""
                     <div class="pass">
@@ -679,14 +773,25 @@ class ReportGenerator:
                         </div>
                     </div>
                     """
+            
+            html += """
+                </div>
+            </div>
+            """
         
-        # Generate JavaScript for violations list
+        # Generate JavaScript for violations list with URL grouping
         violations_js = ""
-        for i, violation in enumerate(all_violations):
+        current_url = None
+        for violation in all_violations:
+            if violation.get('url') != current_url:
+                if current_url is not None:
+                    violations_js += "</div>"
+                current_url = violation.get('url')
+                violations_js += f'<h4 style="color: #c53030; margin: 20px 0 10px 0; padding: 10px; background: #fed7d7; border-radius: 5px;">🌐 {current_url}</h4><div style="margin-left: 20px;">'
+            
             violations_js += f"""
             <div class="violation">
                 <h3>❌ {violation.get('help', 'Unknown Rule')}</h3>
-                <p><strong>URL:</strong> {violation.get('url', 'Unknown')}</p>
                 <div class="violation-details">
                     <div class="detail-item">
                         <div class="detail-label">Impact</div>
@@ -707,14 +812,22 @@ class ReportGenerator:
                 </div>
             </div>
             """
+        if current_url is not None:
+            violations_js += "</div>"
         
-        # Generate JavaScript for passes list
+        # Generate JavaScript for passes list with URL grouping
         passes_js = ""
-        for i, pass_result in enumerate(all_passes):
+        current_url = None
+        for pass_result in all_passes:
+            if pass_result.get('url') != current_url:
+                if current_url is not None:
+                    passes_js += "</div>"
+                current_url = pass_result.get('url')
+                passes_js += f'<h4 style="color: #22543d; margin: 20px 0 10px 0; padding: 10px; background: #c6f6d5; border-radius: 5px;">🌐 {current_url}</h4><div style="margin-left: 20px;">'
+            
             passes_js += f"""
             <div class="pass">
                 <h3>✅ {pass_result.get('help', 'Unknown Rule')}</h3>
-                <p><strong>URL:</strong> {pass_result.get('url', 'Unknown')}</p>
                 <div class="pass-details">
                     <div class="detail-item">
                         <div class="detail-label">Description</div>
@@ -731,6 +844,8 @@ class ReportGenerator:
                 </div>
             </div>
             """
+        if current_url is not None:
+            passes_js += "</div>"
         
         html += f"""
         </div>

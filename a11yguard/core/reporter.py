@@ -534,6 +534,109 @@ class ReportGenerator:
             z-index: 10;
         }}
         
+        .urls-details {{
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }}
+        
+        .urls-details h3 {{
+            color: #3498db;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            position: sticky;
+            top: 0;
+            background: #f8f9fa;
+            padding: 10px 0;
+            z-index: 10;
+        }}
+        
+        .errors-details {{
+            background: #fffaf0;
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }}
+        
+        .errors-details h3 {{
+            color: #f39c12;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            position: sticky;
+            top: 0;
+            background: #fffaf0;
+            padding: 10px 0;
+            z-index: 10;
+        }}
+        
+        .url-item {{
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }}
+        
+        .url-item h4 {{
+            color: #3498db;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }}
+        
+        .url-item-stats {{
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }}
+        
+        .url-item-stat {{
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }}
+        
+        .url-item-stat.violations {{
+            background: #fed7d7;
+            color: #c53030;
+        }}
+        
+        .url-item-stat.passes {{
+            background: #c6f6d5;
+            color: #22543d;
+        }}
+        
+        .error-item {{
+            background: white;
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }}
+        
+        .error-item h4 {{
+            color: #f39c12;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }}
+        
+        .error-item .error-message {{
+            color: #c05621;
+            font-weight: bold;
+            margin-top: 10px;
+        }}
+        
         .back-button {{
             background: #3498db;
             color: white;
@@ -573,30 +676,40 @@ class ReportGenerator:
         
         /* Custom scrollbar styling */
         .violations-details::-webkit-scrollbar,
-        .passes-details::-webkit-scrollbar {{
+        .passes-details::-webkit-scrollbar,
+        .urls-details::-webkit-scrollbar,
+        .errors-details::-webkit-scrollbar {{
             width: 8px;
         }}
         
         .violations-details::-webkit-scrollbar-track,
-        .passes-details::-webkit-scrollbar-track {{
+        .passes-details::-webkit-scrollbar-track,
+        .urls-details::-webkit-scrollbar-track,
+        .errors-details::-webkit-scrollbar-track {{
             background: #f1f1f1;
             border-radius: 4px;
         }}
         
         .violations-details::-webkit-scrollbar-thumb,
-        .passes-details::-webkit-scrollbar-thumb {{
+        .passes-details::-webkit-scrollbar-thumb,
+        .urls-details::-webkit-scrollbar-thumb,
+        .errors-details::-webkit-scrollbar-thumb {{
             background: #c1c1c1;
             border-radius: 4px;
         }}
         
         .violations-details::-webkit-scrollbar-thumb:hover,
-        .passes-details::-webkit-scrollbar-thumb:hover {{
+        .passes-details::-webkit-scrollbar-thumb:hover,
+        .urls-details::-webkit-scrollbar-thumb:hover,
+        .errors-details::-webkit-scrollbar-thumb:hover {{
             background: #a8a8a8;
         }}
         
         /* Firefox scrollbar styling */
         .violations-details,
-        .passes-details {{
+        .passes-details,
+        .urls-details,
+        .errors-details {{
             scrollbar-width: thin;
             scrollbar-color: #c1c1c1 #f1f1f1;
         }}
@@ -627,7 +740,7 @@ class ReportGenerator:
         <div class="summary">
             <h2>📊 Test Summary</h2>
             <div class="metrics-grid">
-                <div class="metric-card urls">
+                <div class="metric-card urls" onclick="showUrls()">
                     <div class="metric-value">{summary['urls_tested']}</div>
                     <div class="metric-label">URLs Tested</div>
                 </div>
@@ -639,7 +752,7 @@ class ReportGenerator:
                     <div class="metric-value">{summary['total_passes']}</div>
                     <div class="metric-label">Total Passes</div>
                 </div>
-                <div class="metric-card errors">
+                <div class="metric-card errors" onclick="showErrors()">
                     <div class="metric-value">{summary['total_errors']}</div>
                     <div class="metric-label">Test Errors</div>
                 </div>
@@ -665,6 +778,18 @@ class ReportGenerator:
             <button class="back-button" onclick="hidePasses()">← Back to Summary</button>
             <h3>✅ All Passed Checks</h3>
             <div id="passes-list"></div>
+        </div>
+        
+        <div id="urls-details" class="urls-details hidden">
+            <button class="back-button" onclick="hideUrls()">← Back to Summary</button>
+            <h3>🌐 All URLs Tested</h3>
+            <div id="urls-list"></div>
+        </div>
+        
+        <div id="errors-details" class="errors-details hidden">
+            <button class="back-button" onclick="hideErrors()">← Back to Summary</button>
+            <h3>⚠️ All Test Errors</h3>
+            <div id="errors-list"></div>
         </div>
         
         <div id="results-section" class="results-section">
@@ -791,7 +916,7 @@ class ReportGenerator:
             
             violations_js += f"""
             <div class="violation">
-                <h3>❌ {violation.get('help', 'Unknown Rule')}</h3>
+                <h3>❌ {violation.get('help', 'Unknown Rule').replace("'", "\\'").replace('"', '\\"')}</h3>
                 <div class="violation-details">
                     <div class="detail-item">
                         <div class="detail-label">Impact</div>
@@ -799,7 +924,7 @@ class ReportGenerator:
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">Description</div>
-                        <div class="detail-value">{violation.get('description', 'No description')}</div>
+                        <div class="detail-value">{violation.get('description', 'No description').replace("'", "\\'").replace('"', '\\"')}</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">Help URL</div>
@@ -827,11 +952,11 @@ class ReportGenerator:
             
             passes_js += f"""
             <div class="pass">
-                <h3>✅ {pass_result.get('help', 'Unknown Rule')}</h3>
+                <h3>✅ {pass_result.get('help', 'Unknown Rule').replace("'", "\\'").replace('"', '\\"')}</h3>
                 <div class="pass-details">
                     <div class="detail-item">
                         <div class="detail-label">Description</div>
-                        <div class="detail-value">{pass_result.get('description', 'No description')}</div>
+                        <div class="detail-value">{pass_result.get('description', 'No description').replace("'", "\\'").replace('"', '\\"')}</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">Help URL</div>
@@ -847,34 +972,154 @@ class ReportGenerator:
         if current_url is not None:
             passes_js += "</div>"
         
+        # Generate JavaScript for URLs list
+        urls_js = ""
+        for result in results:
+            url = result.get('url', 'Unknown URL')
+            violations = []
+            passes = []
+            
+            if 'results' in result and result['results']:
+                violations = result['results'].get('violations', [])
+                passes = result['results'].get('passes', [])
+            
+            urls_js += f"""
+            <div class="url-item">
+                <h4>🌐 {url}</h4>
+                <div class="url-item-stats">
+                    <div class="url-item-stat violations">{len(violations)} Violations</div>
+                    <div class="url-item-stat passes">{len(passes)} Passes</div>
+                </div>
+            </div>
+            """
+        
+        # Generate JavaScript for errors list
+        errors_js = ""
+        for result in results:
+            url = result.get('url', 'Unknown URL')
+            
+            if 'error' in result and result['error']:
+                errors_js += f"""
+                <div class="error-item">
+                    <h4>🌐 {url}</h4>
+                    <div class="error-message">{result['error']}</div>
+                </div>
+                """
+        
+        # If no errors, show a message
+        if not errors_js:
+            errors_js = """
+            <div class="error-item">
+                <h4>✅ No Test Errors</h4>
+                <div class="error-message">All tests completed successfully without any errors.</div>
+            </div>
+            """
+        
         html += f"""
         </div>
     </div>
     
     <script>
+        // Store the content for each section
+        const violationsContent = `{violations_js}`;
+        const passesContent = `{passes_js}`;
+        const urlsContent = `{urls_js}`;
+        const errorsContent = `{errors_js}`;
+        
         function showViolations() {{
+            console.log('showViolations called');
             document.getElementById('violations-details').classList.remove('hidden');
             document.getElementById('passes-details').classList.add('hidden');
+            document.getElementById('urls-details').classList.add('hidden');
+            document.getElementById('errors-details').classList.add('hidden');
             document.getElementById('results-section').classList.add('hidden');
-            document.getElementById('violations-list').innerHTML = `{violations_js}`;
+            document.getElementById('violations-list').innerHTML = violationsContent;
         }}
         
         function showPasses() {{
+            console.log('showPasses called');
             document.getElementById('passes-details').classList.remove('hidden');
             document.getElementById('violations-details').classList.add('hidden');
+            document.getElementById('urls-details').classList.add('hidden');
+            document.getElementById('errors-details').classList.add('hidden');
             document.getElementById('results-section').classList.add('hidden');
-            document.getElementById('passes-list').innerHTML = `{passes_js}`;
+            document.getElementById('passes-list').innerHTML = passesContent;
+        }}
+        
+        function showUrls() {{
+            console.log('showUrls called');
+            document.getElementById('urls-details').classList.remove('hidden');
+            document.getElementById('violations-details').classList.add('hidden');
+            document.getElementById('passes-details').classList.add('hidden');
+            document.getElementById('errors-details').classList.add('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('urls-list').innerHTML = urlsContent;
+        }}
+
+        function showErrors() {{
+            console.log('showErrors called');
+            document.getElementById('errors-details').classList.remove('hidden');
+            document.getElementById('violations-details').classList.add('hidden');
+            document.getElementById('passes-details').classList.add('hidden');
+            document.getElementById('urls-details').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+            document.getElementById('errors-list').innerHTML = errorsContent;
         }}
         
         function hideViolations() {{
+            console.log('hideViolations called');
             document.getElementById('violations-details').classList.add('hidden');
             document.getElementById('results-section').classList.remove('hidden');
         }}
         
         function hidePasses() {{
+            console.log('hidePasses called');
             document.getElementById('passes-details').classList.add('hidden');
             document.getElementById('results-section').classList.remove('hidden');
         }}
+
+        function hideUrls() {{
+            console.log('hideUrls called');
+            document.getElementById('urls-details').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+        }}
+
+        function hideErrors() {{
+            console.log('hideErrors called');
+            document.getElementById('errors-details').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+        }}
+        
+        // Add event listeners as backup
+        document.addEventListener('DOMContentLoaded', function() {{
+            console.log('DOM loaded, adding event listeners');
+            
+            // Add click event listeners to metric cards
+            const violationsCard = document.querySelector('.metric-card.violations');
+            const passesCard = document.querySelector('.metric-card.passes');
+            const urlsCard = document.querySelector('.metric-card.urls');
+            const errorsCard = document.querySelector('.metric-card.errors');
+            
+            if (violationsCard) {{
+                violationsCard.addEventListener('click', showViolations);
+                console.log('Added click listener to violations card');
+            }}
+            
+            if (passesCard) {{
+                passesCard.addEventListener('click', showPasses);
+                console.log('Added click listener to passes card');
+            }}
+            
+            if (urlsCard) {{
+                urlsCard.addEventListener('click', showUrls);
+                console.log('Added click listener to urls card');
+            }}
+            
+            if (errorsCard) {{
+                errorsCard.addEventListener('click', showErrors);
+                console.log('Added click listener to errors card');
+            }}
+        }});
     </script>
 </body>
 </html>

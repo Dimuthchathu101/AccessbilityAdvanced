@@ -173,7 +173,8 @@ class ReportGenerator:
         for result in results:
             urls_tested.add(result.get('url', ''))
             
-            if 'error' in result:
+            # Check if there's an actual error (not None)
+            if 'error' in result and result['error']:
                 total_errors += 1
                 continue
             
@@ -211,31 +212,411 @@ class ReportGenerator:
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accessibility Test Report</title>
     <style>
-        body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .summary {{ background: #f5f5f5; padding: 20px; border-radius: 5px; margin-bottom: 20px; }}
-        .violation {{ background: #ffe6e6; border-left: 4px solid #ff4444; padding: 10px; margin: 10px 0; }}
-        .pass {{ background: #e6ffe6; border-left: 4px solid #44ff44; padding: 10px; margin: 10px 0; }}
-        .error {{ background: #ffe6cc; border-left: 4px solid #ff8800; padding: 10px; margin: 10px 0; }}
-        .url-header {{ background: #333; color: white; padding: 10px; margin: 20px 0 10px 0; }}
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+        
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }}
+        
+        .container {{
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }}
+        
+        .header {{
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }}
+        
+        .header h1 {{
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }}
+        
+        .header p {{
+            opacity: 0.9;
+            font-size: 1.1em;
+        }}
+        
+        .summary {{
+            background: #f8f9fa;
+            padding: 30px;
+            border-bottom: 1px solid #e9ecef;
+        }}
+        
+        .summary h2 {{
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            font-weight: 600;
+        }}
+        
+        .metrics-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }}
+        
+        .metric-card {{
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }}
+        
+        .metric-card:hover {{
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }}
+        
+        .metric-card.violations {{
+            border-left: 4px solid #e74c3c;
+        }}
+        
+        .metric-card.passes {{
+            border-left: 4px solid #27ae60;
+        }}
+        
+        .metric-card.errors {{
+            border-left: 4px solid #f39c12;
+        }}
+        
+        .metric-card.urls {{
+            border-left: 4px solid #3498db;
+        }}
+        
+        .metric-value {{
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }}
+        
+        .metric-label {{
+            color: #7f8c8d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }}
+        
+        .violations .metric-value {{
+            color: #e74c3c;
+        }}
+        
+        .passes .metric-value {{
+            color: #27ae60;
+        }}
+        
+        .errors .metric-value {{
+            color: #f39c12;
+        }}
+        
+        .urls .metric-value {{
+            color: #3498db;
+        }}
+        
+        .compliance-rate {{
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }}
+        
+        .compliance-rate h3 {{
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }}
+        
+        .compliance-percentage {{
+            font-size: 3em;
+            font-weight: bold;
+        }}
+        
+        .results-section {{
+            padding: 30px;
+        }}
+        
+        .url-header {{
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 500;
+        }}
+        
+        .violation {{
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }}
+        
+        .violation h3 {{
+            color: #c53030;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }}
+        
+        .violation-details {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }}
+        
+        .detail-item {{
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #e74c3c;
+        }}
+        
+        .detail-label {{
+            font-weight: bold;
+            color: #2d3748;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }}
+        
+        .detail-value {{
+            color: #4a5568;
+            margin-top: 5px;
+        }}
+        
+        .pass {{
+            background: #f0fff4;
+            border: 1px solid #c6f6d5;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }}
+        
+        .pass h3 {{
+            color: #22543d;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }}
+        
+        .pass-details {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }}
+        
+        .pass .detail-item {{
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #27ae60;
+        }}
+        
+        .error {{
+            background: #fffaf0;
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }}
+        
+        .error strong {{
+            color: #c05621;
+        }}
+        
+        .hidden {{
+            display: none;
+        }}
+        
+        .violations-details {{
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }}
+        
+        .violations-details h3 {{
+            color: #c53030;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            position: sticky;
+            top: 0;
+            background: #fff5f5;
+            padding: 10px 0;
+            z-index: 10;
+        }}
+        
+        .passes-details {{
+            background: #f0fff4;
+            border: 1px solid #c6f6d5;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }}
+        
+        .passes-details h3 {{
+            color: #22543d;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            position: sticky;
+            top: 0;
+            background: #f0fff4;
+            padding: 10px 0;
+            z-index: 10;
+        }}
+        
+        .back-button {{
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 1em;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }}
+        
+        .back-button:hover {{
+            background: #2980b9;
+        }}
+        
+        /* Custom scrollbar styling */
+        .violations-details::-webkit-scrollbar,
+        .passes-details::-webkit-scrollbar {{
+            width: 8px;
+        }}
+        
+        .violations-details::-webkit-scrollbar-track,
+        .passes-details::-webkit-scrollbar-track {{
+            background: #f1f1f1;
+            border-radius: 4px;
+        }}
+        
+        .violations-details::-webkit-scrollbar-thumb,
+        .passes-details::-webkit-scrollbar-thumb {{
+            background: #c1c1c1;
+            border-radius: 4px;
+        }}
+        
+        .violations-details::-webkit-scrollbar-thumb:hover,
+        .passes-details::-webkit-scrollbar-thumb:hover {{
+            background: #a8a8a8;
+        }}
+        
+        /* Firefox scrollbar styling */
+        .violations-details,
+        .passes-details {{
+            scrollbar-width: thin;
+            scrollbar-color: #c1c1c1 #f1f1f1;
+        }}
+        
+        @media (max-width: 768px) {{
+            .metrics-grid {{
+                grid-template-columns: repeat(2, 1fr);
+            }}
+            
+            .violation-details {{
+                grid-template-columns: 1fr;
+            }}
+        }}
     </style>
 </head>
 <body>
-    <h1>Accessibility Test Report</h1>
-    <div class="summary">
-        <h2>Summary</h2>
-        <p><strong>URLs Tested:</strong> {summary['urls_tested']}</p>
-        <p><strong>Total Violations:</strong> {summary['total_violations']}</p>
-        <p><strong>Total Passes:</strong> {summary['total_passes']}</p>
-        <p><strong>Compliance Rate:</strong> {summary['compliance_rate']}%</p>
-        <p><strong>Generated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-    </div>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Accessibility Test Report</h1>
+            <p>Comprehensive accessibility analysis results</p>
+        </div>
+        
+        <div class="summary">
+            <h2>📊 Test Summary</h2>
+            <div class="metrics-grid">
+                <div class="metric-card urls">
+                    <div class="metric-value">{summary['urls_tested']}</div>
+                    <div class="metric-label">URLs Tested</div>
+                </div>
+                <div class="metric-card violations" onclick="showViolations()">
+                    <div class="metric-value">{summary['total_violations']}</div>
+                    <div class="metric-label">Total Violations</div>
+                </div>
+                <div class="metric-card passes" onclick="showPasses()">
+                    <div class="metric-value">{summary['total_passes']}</div>
+                    <div class="metric-label">Total Passes</div>
+                </div>
+                <div class="metric-card errors">
+                    <div class="metric-value">{summary['total_errors']}</div>
+                    <div class="metric-label">Test Errors</div>
+                </div>
+            </div>
+            
+            <div class="compliance-rate">
+                <h3>🎯 Compliance Rate</h3>
+                <div class="compliance-percentage">{summary['compliance_rate']}%</div>
+            </div>
+            
+            <p style="margin-top: 20px; color: #7f8c8d; font-size: 0.9em;">
+                <strong>Generated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+            </p>
+        </div>
+        
+        <div id="violations-details" class="violations-details hidden">
+            <button class="back-button" onclick="hideViolations()">← Back to Summary</button>
+            <h3>🚨 All Violations Found</h3>
+            <div id="violations-list"></div>
+        </div>
+        
+        <div id="passes-details" class="passes-details hidden">
+            <button class="back-button" onclick="hidePasses()">← Back to Summary</button>
+            <h3>✅ All Passed Checks</h3>
+            <div id="passes-list"></div>
+        </div>
+        
+        <div id="results-section" class="results-section">
 """
+        
+        # Collect all violations and passes for the details sections
+        all_violations = []
+        all_passes = []
         
         for result in results:
             url = result.get('url', 'Unknown URL')
-            html += f'<div class="url-header">{url}</div>'
+            html += f'<div class="url-header">🌐 {url}</div>'
             
-            if 'error' in result:
+            if 'error' in result and result['error']:
                 html += f'<div class="error"><strong>Error:</strong> {result["error"]}</div>'
                 continue
             
@@ -243,25 +624,143 @@ class ReportGenerator:
                 violations = result['results'].get('violations', [])
                 passes = result['results'].get('passes', [])
                 
+                # Add violations to the collection
+                for violation in violations:
+                    violation['url'] = url
+                    all_violations.append(violation)
+                
+                # Add passes to the collection
+                for pass_result in passes:
+                    pass_result['url'] = url
+                    all_passes.append(pass_result)
+                
                 for violation in violations:
                     html += f"""
                     <div class="violation">
-                        <h3>{violation.get('help', 'Unknown Rule')}</h3>
-                        <p><strong>Impact:</strong> {violation.get('impact', 'Unknown')}</p>
-                        <p><strong>Description:</strong> {violation.get('description', 'No description')}</p>
-                        <p><strong>Help:</strong> {violation.get('helpUrl', 'No help URL')}</p>
+                        <h3>❌ {violation.get('help', 'Unknown Rule')}</h3>
+                        <div class="violation-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Impact</div>
+                                <div class="detail-value">{violation.get('impact', 'Unknown')}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">{violation.get('description', 'No description')}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="{violation.get('helpUrl', '#')}" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     """
                 
                 for pass_result in passes:
                     html += f"""
                     <div class="pass">
-                        <h3>{pass_result.get('help', 'Unknown Rule')} ✓</h3>
-                        <p><strong>Description:</strong> {pass_result.get('description', 'No description')}</p>
+                        <h3>✅ {pass_result.get('help', 'Unknown Rule')}</h3>
+                        <div class="pass-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Description</div>
+                                <div class="detail-value">{pass_result.get('description', 'No description')}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Help URL</div>
+                                <div class="detail-value">
+                                    <a href="{pass_result.get('helpUrl', '#')}" target="_blank" style="color: #3498db;">
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     """
         
-        html += """
+        # Generate JavaScript for violations list
+        violations_js = ""
+        for i, violation in enumerate(all_violations):
+            violations_js += f"""
+            <div class="violation">
+                <h3>❌ {violation.get('help', 'Unknown Rule')}</h3>
+                <p><strong>URL:</strong> {violation.get('url', 'Unknown')}</p>
+                <div class="violation-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Impact</div>
+                        <div class="detail-value">{violation.get('impact', 'Unknown')}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">{violation.get('description', 'No description')}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="{violation.get('helpUrl', '#')}" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """
+        
+        # Generate JavaScript for passes list
+        passes_js = ""
+        for i, pass_result in enumerate(all_passes):
+            passes_js += f"""
+            <div class="pass">
+                <h3>✅ {pass_result.get('help', 'Unknown Rule')}</h3>
+                <p><strong>URL:</strong> {pass_result.get('url', 'Unknown')}</p>
+                <div class="pass-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value">{pass_result.get('description', 'No description')}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Help URL</div>
+                        <div class="detail-value">
+                            <a href="{pass_result.get('helpUrl', '#')}" target="_blank" style="color: #3498db;">
+                                View Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """
+        
+        html += f"""
+        </div>
+    </div>
+    
+    <script>
+        function showViolations() {{
+            document.getElementById('violations-details').classList.remove('hidden');
+            document.getElementById('passes-details').classList.add('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('violations-list').innerHTML = `{violations_js}`;
+        }}
+        
+        function showPasses() {{
+            document.getElementById('passes-details').classList.remove('hidden');
+            document.getElementById('violations-details').classList.add('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('passes-list').innerHTML = `{passes_js}`;
+        }}
+        
+        function hideViolations() {{
+            document.getElementById('violations-details').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+        }}
+        
+        function hidePasses() {{
+            document.getElementById('passes-details').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+        }}
+    </script>
 </body>
 </html>
 """

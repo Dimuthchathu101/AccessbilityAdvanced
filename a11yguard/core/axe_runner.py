@@ -7,6 +7,7 @@ accessibility tests on web pages.
 
 import json
 import logging
+import os
 from typing import Dict, List, Optional, Any
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -27,6 +28,7 @@ class AxeRunner:
         self.headless = headless
         self.driver = None
         self.logger = logging.getLogger(__name__)
+        self.axe_loaded = False
         
     def setup_driver(self) -> webdriver.Chrome:
         """Set up Chrome WebDriver with axe-core injection."""
@@ -35,33 +37,30 @@ class AxeRunner:
             options.add_argument("--headless")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1920,1080")
         
         self.driver = webdriver.Chrome(options=options)
-        
-        # Inject axe-core script
-        axe_script = self._get_axe_script()
-        self.driver.execute_script(axe_script)
-        
         return self.driver
     
-    def _get_axe_script(self) -> str:
-        """Get the axe-core JavaScript code."""
-        # In a real implementation, this would load from a CDN or local file
-        return """
-        // Placeholder for axe-core script injection
-        // In production, this would load the actual axe-core library
-        window.axe = {
-            run: function(context, options, callback) {
-                // Mock implementation
-                callback(null, {
-                    violations: [],
-                    passes: [],
-                    incomplete: [],
-                    inapplicable: []
-                });
-            }
-        };
-        """
+    def _load_axe_core(self):
+        """Load axe-core JavaScript library into the page."""
+        try:
+            # Get the path to axe.min.js
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            axe_path = os.path.join(current_dir, 'axe.min.js')
+            
+            # Read and inject axe-core
+            with open(axe_path, 'r', encoding='utf-8') as f:
+                axe_script = f.read()
+            
+            # Inject axe-core into the page
+            self.driver.execute_script(axe_script)
+            self.logger.info("Axe-core library loaded successfully")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to load axe-core: {str(e)}")
+            raise
     
     def run_test(self, url: str, rules: Optional[List[str]] = None) -> Dict[str, Any]:
         """Run accessibility tests on a given URL.
@@ -85,15 +84,31 @@ class AxeRunner:
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
             
-            # Run axe-core tests
+            # Load axe-core for each URL (since page context changes)
+            self._load_axe_core()
+            
+            # Prepare options for axe-core
             options = {}
             if rules:
                 options["rules"] = {rule: {"enabled": True} for rule in rules}
             
-            result = self.driver.execute_script("""
-                return new Promise((resolve) => {
-                    axe.run(options, (err, results) => {
-                        resolve({error: err, results: results});
+            # Run axe-core tests with proper JavaScript execution
+            result = self.driver.execute_async_script("""
+                var options = arguments[0];
+                var callback = arguments[arguments.length - 1];
+                
+                if (typeof axe === 'undefined') {
+                    callback({
+                        error: 'Axe-core library not loaded',
+                        results: null
+                    });
+                    return;
+                }
+                
+                axe.run(options, (err, results) => {
+                    callback({
+                        error: err ? err.message : null,
+                        results: results
                     });
                 });
             """, options)
@@ -123,6 +138,7 @@ class AxeRunner:
         if self.driver:
             self.driver.quit()
             self.driver = None
+            self.axe_loaded = False
     
     def __enter__(self):
         """Context manager entry."""

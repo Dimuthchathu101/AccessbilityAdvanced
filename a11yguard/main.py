@@ -360,7 +360,7 @@ def display_results_summary(results: List[Dict[str, Any]]):
     total_errors = 0
     
     for result in results:
-        if 'error' in result:
+        if 'error' in result and result['error']:
             total_errors += 1
         elif 'results' in result and result['results']:
             violations = result['results'].get('violations', [])
